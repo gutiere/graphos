@@ -1,0 +1,11 @@
+[project]
+name = "graphos"
+version = "0.1.0"
+description = "Terminal graph visualization tool."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "rich>=14.0.0",
+    "setuptools>=79.0.1",
+    "twine>=6.1.0",
+]
