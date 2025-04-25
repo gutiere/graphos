@@ -9,11 +9,11 @@ import json
 import logging
 from pathlib import Path
 
-from edge import Edge
-from menu import Menu
-from node import Node
-from cursor import Cursor
-from offset import Offset
+from graphos.src.edge import Edge
+from graphos.src.menu import Menu
+from graphos.src.node import Node
+from graphos.src.cursor import Cursor
+from graphos.src.offset import Offset
 
 MOUSE_OUTPUT = "logging/mouse.txt"
 Path(MOUSE_OUTPUT).parent.mkdir(parents=True, exist_ok=True)
@@ -44,6 +44,8 @@ def handle_input(
     offset,
     selected_nodes,
     select_node,
+    set_last_mouse_press,
+    get_last_mouse_press,
 ) -> bool:
     if key != curses.KEY_MOUSE:
         logger.debug(f"Key: {key}")
@@ -83,12 +85,41 @@ def handle_input(
 
     elif key == curses.KEY_MOUSE:
         event = curses.getmouse()
-        # if event[4] != 134217728:
-        #     logger.debug(f"Mouse event: {event}")
-        #     with open(MOUSE_OUTPUT, "a") as f:
-        #         f.write(f"{event}\n")
+        if event[4] != 134217728:
+            logger.debug(f"Mouse event: {event}")
+            with open(MOUSE_OUTPUT, "a") as f:
+                f.write(f"{event}\n")
+        
         y = event[2]
         x = event[1]
+        event_type = event[4]
+        if event_type == 2:  # Mouse button pressed
+            set_last_mouse_press(x, y)
+            cursor.grab = True
+            for node in nodes:
+                node.assess_position(cursor)
+                if node.focused:
+                    node.grabbed = True
+        elif event_type == 1:  # Mouse button released
+            last_mouse_press = get_last_mouse_press()
+            cursor.grab = False
+            for node in nodes:
+                node.assess_position(cursor)
+                if node.focused:
+                    logger.debug(f"x: {x}, y: {y}")
+                    logger.debug(f"cursor.x: {cursor.x}, cursor.y: {cursor.y}")
+                    logger.debug(f"last_mouse_press: {last_mouse_press}")
+                    if last_mouse_press is not None and last_mouse_press == (x, y):
+                        logger.debug(f"Clicked on node: {node.value}")
+                        select_node(node)
+                    node.grabbed = False
+        # elif event_type == 4:  # Mouse button click
+        #     curses.beep()
+        #     for node in nodes:
+        #         node.assess_position(cursor)
+        #         if node.focused:
+        #             select_node(node)
+        #             node.grabbed = False
 
         if cursor.grab:
             for node in nodes:
@@ -97,26 +128,6 @@ def handle_input(
 
         cursor.x = x
         cursor.y = y
-
-        event_type = event[4]
-        if event_type == 2:  # Mouse button pressed
-            cursor.grab = True
-            for node in nodes:
-                node.assess_position(cursor)
-                if node.focused:
-                    node.grabbed = True
-        elif event_type == 1:  # Mouse button released
-            cursor.grab = False
-            for node in nodes:
-                node.assess_position(cursor)
-                if node.focused:
-                    node.grabbed = False
-        elif event_type == 4:  # Mouse button click
-            for node in nodes:
-                node.assess_position(cursor)
-                if node.focused:
-                    select_node(node)
-                    node.grabbed = False
 
     elif key == ord("a"):
         offset.x -= 1
@@ -218,12 +229,26 @@ def main(stdscr):
     offset = Offset(0, 0)
 
     def select_node(node: Node):
+        if node in selected_nodes:
+            node.selected = False
+            selected_nodes.remove(node)
+            return
+        
         selected_nodes.append(node)
         node.selected = True
 
         while len(selected_nodes) > 2:
             popped_node = selected_nodes.pop(0)
             popped_node.selected = False
+
+    last_mouse_press = None
+    def set_last_mouse_press(x, y):
+        nonlocal last_mouse_press
+        last_mouse_press = (x, y)
+
+    def get_last_mouse_press():
+        nonlocal last_mouse_press
+        return last_mouse_press
 
     while True:
 
@@ -270,6 +295,8 @@ def main(stdscr):
             offset,
             selected_nodes,
             select_node,
+            set_last_mouse_press,
+            get_last_mouse_press,
         )
 
         # Refresh the screen

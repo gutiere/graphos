@@ -1,4 +1,4 @@
-from utils import get_safe_x, get_safe_y
+from graphos.src.utils import get_safe_x, get_safe_y
 
 
 class Cursor:

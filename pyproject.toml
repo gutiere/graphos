@@ -1,6 +1,6 @@
 [project]
 name = "graphos"
-version = "0.1.0"
+version = "0.1.7"
 description = "Terminal graph visualization tool."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -9,3 +9,10 @@ dependencies = [
     "setuptools>=79.0.1",
     "twine>=6.1.0",
 ]
+
+[project.scripts]
+graphos = "graphos.src:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["graphos*"]
