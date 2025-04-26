@@ -1,5 +1,7 @@
 # Graphos
 
+Basic terminal GUI for flow charts style graphs.
+
 ## Controls
 
 ## Keybindings
