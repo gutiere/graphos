@@ -2,6 +2,12 @@
 
 Basic terminal GUI for flow charts style graphs.
 
+## Installation
+
+https://pypi.org/project/graphos/
+
+`$ pip install graphos`
+
 ## Controls
 
 ## Keybindings
