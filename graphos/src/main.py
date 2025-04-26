@@ -205,7 +205,7 @@ def main(stdscr):
     # Initialize curses color
     curses.start_color()
     curses.use_default_colors()
-    for i in range(0, curses.COLORS):
+    for i in range(curses.COLORS - 1):
         curses.init_pair(i + 1, i, -1)
     # Hide the cursor
     curses.curs_set(0)
