@@ -113,14 +113,6 @@ def handle_input(
                         logger.debug(f"Clicked on node: {node.value}")
                         select_node(node)
                     node.grabbed = False
-        # elif event_type == 4:  # Mouse button click
-        #     curses.beep()
-        #     for node in nodes:
-        #         node.assess_position(cursor)
-        #         if node.focused:
-        #             select_node(node)
-        #             node.grabbed = False
-
         if cursor.grab:
             for node in nodes:
                 if node.grabbed:
@@ -173,10 +165,11 @@ def handle_input(
             curses.beep()
         else:
             # Create a new window for the textbox
-            editwin = curses.newwin(1, 16, cursor.y, cursor.x)
+            editwin = curses.newwin(1, 30, cursor.y, cursor.x)
             rectangle(
-                stdscr, cursor.y - 1, cursor.x - 2, cursor.y + 1 + 1, cursor.x + 16 + 1
+                stdscr, cursor.y - 1, cursor.x - 2, cursor.y + 2, cursor.x + 45 + 1
             )
+            stdscr.addstr(cursor.y - 1, cursor.x - 2, "Node name (ctrl+h to delete, enter to create): ")
             stdscr.refresh()
 
             # Create a Textbox object
@@ -215,12 +208,6 @@ def main(stdscr):
 
     nodes: list[Node] = []
     edges: list[Edge] = []
-
-    # Example nodes
-    nodes.append(Node(x=30, y=10, width=10, height=2, value="Hello"))
-    nodes.append(Node(x=60, y=20, width=10, height=2, value="World 1"))
-    nodes.append(Node(x=10, y=30, width=10, height=2, value="World 2"))
-    # Example nodes
 
     cursor = Cursor(window_width // 2, window_height // 2)
     menu = Menu(window_width, window_height, nodes, cursor.x, cursor.y)
