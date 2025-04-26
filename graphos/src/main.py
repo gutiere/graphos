@@ -153,7 +153,8 @@ def handle_input(
                 node.grabbed = False
     elif key == ord("c"):
         # Clear the screen
-        nodes = []
+        nodes.clear()
+        edges.clear()
         stdscr.clear()
     elif key == ord("e"):
         if len(selected_nodes) == 2:
