@@ -10,7 +10,7 @@ https://pypi.org/project/graphos/
 
 ## Controls
 
-## Keybindings
+### Keybindings
 
 | Control           | Keybind | Description                                |
 | :---------------- | :-----: | :----------------------------------------- |
@@ -28,7 +28,7 @@ https://pypi.org/project/graphos/
 | Pan down          |    S    | Pan the view down                          |
 | Quit              |    Q    | Quit                                       |
 
-## Mouse
+### Mouse
 
 ℹ️ Mouse functionality requires mouse event recording to be enabled by your preferred terminal.
 
