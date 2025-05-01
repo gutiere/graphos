@@ -5,8 +5,7 @@ Module functions as the entrypoint into running the graphos utility.
 import logging
 from pathlib import Path
 
-from curses import wrapper
-import curses
+from curses import wrapper, window
 
 from graphos.src.constants import LOG_OUTPUT, MOUSE_OUTPUT
 from graphos.src.view import View
@@ -24,7 +23,7 @@ def setup_logging() -> None:
     )
 
 
-def main(stdscr: curses.window) -> None:
+def main(stdscr: window) -> None:
     """Operates as the main execution loop for utility
 
     Args: stdscr: window object for interfacing with terminal
@@ -33,7 +32,7 @@ def main(stdscr: curses.window) -> None:
     view.loop()
 
 
-curses.wrapper(main)
+wrapper(main)
 
 
 if __name__ == "__main__":
