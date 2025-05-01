@@ -2,16 +2,17 @@
 Module functions as the entrypoint into running the graphos utility.
 """
 
+import logging
+from pathlib import Path
+
 from curses import wrapper
 import curses
 
-import logging
-from pathlib import Path
 from graphos.src.constants import LOG_OUTPUT, MOUSE_OUTPUT
 from graphos.src.view import View
 
 
-def setup_logging():
+def setup_logging() -> None:
     """Instatiates logging interface and expected levels"""
     Path(MOUSE_OUTPUT).parent.mkdir(parents=True, exist_ok=True)
     Path(LOG_OUTPUT).parent.mkdir(parents=True, exist_ok=True)
