@@ -6,5 +6,5 @@ class Ascii:
     ROUND_LL_CORNER = '╰'
     ROUND_LR_CORNER = '╯'
 
-MOUSE_OUTPUT = "logging/mouse.txt"
-LOG_OUTPUT = "logging/log.txt"
+MOUSE_OUTPUT = "logging/mouse.log"
+LOG_OUTPUT = "logging/application.log"
