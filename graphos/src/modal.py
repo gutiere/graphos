@@ -23,7 +23,7 @@ class Modal:
         self.window.refresh()
 
     def render_border(self):
-        
+        self.window.attron(curses.color_pair(4))
         self.clear_section(self.y, self.x, self.y + self.height, self.x + self.width)
         rectangle(self.window, self.y, self.x, self.y + self.height, self.x + self.width, )
         self.window.addch(self.y, self.x, Ascii.ROUND_UL_CORNDER)
@@ -31,6 +31,7 @@ class Modal:
         self.window.addch(self.y, self.x + self.width, Ascii.ROUND_UR_CORNER)
         self.window.addch(self.y + self.height, self.x + self.width, Ascii.ROUND_LR_CORNER)
         self.window.refresh()
+        self.window.attroff(curses.color_pair(4))
 
     def render(self):
         self.render_border()
