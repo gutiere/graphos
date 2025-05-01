@@ -1,3 +1,4 @@
+import uuid
 from graphos.src.node import Node
 import curses
 
@@ -6,6 +7,7 @@ from graphos.src.utils import get_safe_x, get_safe_y
 
 class Edge:
     def __init__(self, source: Node, target: Node):
+        self.id = str(uuid.uuid4())
         self.source = source
         self.target = target
 
@@ -223,9 +225,25 @@ class Edge:
 
     def to_JSON(self):
         return {
+            "id": self.id,
             "source": self.source.to_JSON(),
             "target": self.target.to_JSON(),
         }
-    def from_JSON(self, data):
-        self.source = Node.from_JSON(data["source"])
-        self.target = Node.from_JSON(data["target"])
+    
+    @staticmethod
+    def from_JSON(data):
+        if not isinstance(data, dict):
+            raise ValueError("Invalid data format. Expected a dictionary.")
+        if "source" not in data or "target" not in data:
+            raise ValueError("Invalid data format. Expected 'source' and 'target' keys.")
+        if not isinstance(data["source"], dict) or not isinstance(data["target"], dict):
+            raise ValueError("Invalid data format. Expected 'source' and 'target' to be dictionaries.")
+        if "id" not in data["source"] or "id" not in data["target"]:
+            raise ValueError("Invalid data format. Expected 'id' key in 'source' and 'target'.")
+        
+        new_edge = Edge(
+            source=Node.from_JSON(data["source"]),
+            target=Node.from_JSON(data["target"])
+        )
+        new_edge.id = data["id"]
+        return new_edge

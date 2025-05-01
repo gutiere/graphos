@@ -195,7 +195,7 @@ wheels = [
 
 [[package]]
 name = "graphos"
-version = "0.1.13"
+version = "0.2.2"
 source = { virtual = "." }
 dependencies = [
     { name = "debugpy" },
