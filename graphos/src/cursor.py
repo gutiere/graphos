@@ -1,6 +1,7 @@
-"""Cursor module defines the interface for interacting with the terminal window.
+"""
+Cursor module defines the interface for interacting with the terminal window.
 
-Contains the Cursor class which defines how the coordinates of position in terminal are calculated
+Contains the Cursor class which defines how the coordinates of position in terminal are calculated.
 """
 
 from curses import window
@@ -50,7 +51,7 @@ class Cursor:
 
     def render(self, stdscr: window, offset: Offset) -> None:
         """Displays the cursor based on current set locations
-        
+
         Args:
             stdscr: curses.window object for current screen size
             offset: Offset calculator for rendering

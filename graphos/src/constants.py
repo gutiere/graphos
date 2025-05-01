@@ -1,4 +1,6 @@
-"""Defines the list of constants that are reused across the application."""
+"""
+Defines the list of constants that are reused across the application.
+"""
 
 from dataclasses import dataclass
 

@@ -1,4 +1,6 @@
-"""Module functions as the entrypoint into running the graphos utility"""
+"""
+Module functions as the entrypoint into running the graphos utility.
+"""
 
 from curses import wrapper
 import curses
@@ -23,7 +25,7 @@ def setup_logging():
 
 def main(stdscr: curses.window) -> None:
     """Operates as the main execution loop for utility
-    
+
     Args: stdscr: window object for interfacing with terminal
     """
     view = View(stdscr)
