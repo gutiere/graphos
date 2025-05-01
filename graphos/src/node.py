@@ -1,12 +1,14 @@
 import curses
 from curses.textpad import rectangle
 import logging
+import uuid
 
 from graphos.src.utils import get_safe_x, get_safe_y
 
 
 class Node:
     def __init__(self, x, y, width, height, value=None):
+        self.id = str(uuid.uuid4())
         self.value = value
         self.x = x
         self.y = y
@@ -144,3 +146,31 @@ class Node:
                 self.get_value_coordinate(offset)[0],
                 self.value,
             )
+    def to_JSON(self):
+        return {
+            "id": self.id,
+            "x": self.x,
+            "y": self.y,
+            "width": self.width,
+            "height": self.height,
+            "value": self.value,
+            "grabbed": self.grabbed,
+            "focused": self.focused,
+            "selected": self.selected,
+        }
+    @staticmethod
+    def from_JSON(data):
+        if not isinstance(data, dict):
+            raise ValueError("Invalid data format. Expected a dictionary.")
+        new_node = Node(
+            x=data["x"],
+            y=data["y"],
+            width=data["width"],
+            height=data["height"],
+            value=data["value"]
+        )
+        new_node.grabbed = data["grabbed"]
+        new_node.focused = data["focused"]
+        new_node.selected = data["selected"]
+        new_node.id = data["id"]
+        return new_node
