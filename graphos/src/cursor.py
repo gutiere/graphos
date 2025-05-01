@@ -35,6 +35,7 @@ class Cursor:
         Args:
             stdscr: curses.window object for current screen size
             offset: int
+
         """
 
         normalized_x = self.x + offset.x
