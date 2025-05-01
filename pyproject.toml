@@ -5,6 +5,7 @@ description = "Terminal graph visualization tool."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "debugpy>=1.8.14",
     "rich>=14.0.0",
     "setuptools>=79.0.1",
     "twine>=6.1.0",

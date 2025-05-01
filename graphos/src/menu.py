@@ -1,11 +1,10 @@
 class Menu:
-    def __init__(self, window_width, window_height, nodes, x, y):
-        self.assess_window(window_width, window_height, nodes, x, y)
+    def __init__(self, window_width, window_height, x, y):
+        self.assess_window(window_width, window_height, x, y)
 
-    def assess_window(self, window_width, window_height, nodes, x, y):
+    def assess_window(self, window_width, window_height, x, y):
         self.window_width = window_width
         self.window_height = window_height
-        self.nodes = nodes
         self.x = x
         self.y = y
 
@@ -17,4 +16,3 @@ class Menu:
             self.window_width - len(hud_string) - 1,
             hud_string,
         )
-        # stdscr.addstr(2, 0, f"Node count: {len(self.nodes)} ")
