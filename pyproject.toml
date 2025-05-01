@@ -11,6 +11,15 @@ dependencies = [
     "twine>=6.1.0",
 ]
 
+[dependency-groups]
+dev = [
+  "pytest",
+  "black",
+  "flake8",
+  "mypy",
+  "pylint"
+]
+
 [project.scripts]
 graphos = "graphos.src:main"
 

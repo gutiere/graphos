@@ -48,12 +48,12 @@ class View:
         self.offset = Offset(0, 0)
         self.last_mouse_press = None
 
-    def select_node(self, node: Node):
+    def select_node(self, node: Node) -> None:
         if node in self.selected_nodes:
             node.selected = False
             self.selected_nodes.remove(node)
             return
-        
+
         self.selected_nodes.append(node)
         node.selected = True
 
@@ -61,10 +61,12 @@ class View:
             popped_node = self.selected_nodes.pop(0)
             popped_node.selected = False
 
-    def set_last_mouse_press(self, x, y):
+    def set_last_mouse_press(self, x: int, y: int) -> None:
+        """Setter for last position of mouse click"""
         self.last_mouse_press = (x, y)
 
-    def get_last_mouse_press(self):
+    def get_last_mouse_press(self) -> tuple[int, int]:
+        """Getter function for last mouse click"""
         return self.last_mouse_press
 
     def setup_keybindings(self):
@@ -119,11 +121,16 @@ class View:
         self.window.border(0)
 
         # Draw border around the window
-        self.menu.assess_window(self.window.getmaxyx()[1], self.window.getmaxyx()[0], self.cursor.x, self.cursor.y)
+        self.menu.assess_window(
+            self.window.getmaxyx()[1],
+            self.window.getmaxyx()[0],
+            self.cursor.x,
+            self.cursor.y,
+        )
         self.menu.render(self.window)
 
         # Draw cursor
-        self.cursor.assess_position(self.window, self.cursor, self.offset)
+        self.cursor.assess_position(self.window, self.offset)
         self.cursor.render(self.window, self.offset)
         self.window.refresh()
 
@@ -134,7 +141,7 @@ class View:
                     if node.grabbed:
                         node.move_up()
             self.cursor.y -= 1
-    
+
     def move_cursor_down(self):
         if self.cursor.y < self.window.getmaxyx[0] - 2:
             if self.cursor.grab:
@@ -150,7 +157,7 @@ class View:
                     if node.grabbed:
                         node.move_left()
             self.cursor.x -= 1
-    
+
     def move_cursor_right(self):
         if self.cursor.x < self.window.getmaxyx[1] - 3:
             if self.cursor.grab:
@@ -158,12 +165,12 @@ class View:
                     if node.grabbed:
                         node.move_right()
             self.cursor.x += 1
-    
+
     def save_state(self):
         # Save the current state
         state = {
-            "nodes": [ node.to_JSON() for node in self.nodes ],
-            "edges": [ edge.to_JSON() for edge in self.edges ],
+            "nodes": [node.to_JSON() for node in self.nodes],
+            "edges": [edge.to_JSON() for edge in self.edges],
         }
         logger.debug(f"Saving state: {state}")
         logger.debug(f"Saving state to {SAVE_OUTPUT}")
@@ -239,10 +246,14 @@ class View:
         if self.is_node_at_cursor():
             curses.beep()
         else:
-            modal = Modal(self.window, "Node name (press enter to create, ctrl+h to delete):")
+            modal = Modal(
+                self.window, "Node name (press enter to create, ctrl+h to delete):"
+            )
             modal.render()
 
-            new_node = Node(x=self.cursor.x, y=self.cursor.y, width=10, height=4, value=modal.title)
+            new_node = Node(
+                x=self.cursor.x, y=self.cursor.y, width=10, height=4, value=modal.title
+            )
             self.nodes.append(new_node)
 
     def quit(self):
@@ -271,7 +282,9 @@ class View:
                 node.assess_position(self.cursor)
                 if node.focused:
                     logger.debug(f"x: {x}, y: {y}")
-                    logger.debug(f"cursor.x: {self.cursor.x}, cursor.y: {self.cursor.y}")
+                    logger.debug(
+                        f"cursor.x: {self.cursor.x}, cursor.y: {self.cursor.y}"
+                    )
                     logger.debug(f"last_mouse_press: {last_mouse_press}")
                     if last_mouse_press is not None and last_mouse_press == (x, y):
                         logger.debug(f"Clicked on node: {node.value}")
