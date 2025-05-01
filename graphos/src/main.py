@@ -1,3 +1,5 @@
+"""Module functions as the entrypoint into running the graphos utility"""
+
 from curses import wrapper
 import curses
 
@@ -8,6 +10,7 @@ from graphos.src.view import View
 
 
 def setup_logging():
+    """Instatiates logging interface and expected levels"""
     Path(MOUSE_OUTPUT).parent.mkdir(parents=True, exist_ok=True)
     Path(LOG_OUTPUT).parent.mkdir(parents=True, exist_ok=True)
 
@@ -18,9 +21,14 @@ def setup_logging():
     )
 
 
-def main(stdscr):
+def main(stdscr: curses.window) -> None:
+    """Operates as the main execution loop for utility
+    
+    Args: stdscr: window object for interfacing with terminal
+    """
     view = View(stdscr)
     view.loop()
+
 
 curses.wrapper(main)
 
