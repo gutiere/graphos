@@ -8,3 +8,4 @@ class Ascii:
 
 MOUSE_OUTPUT = "logging/mouse.log"
 LOG_OUTPUT = "logging/application.log"
+SAVE_OUTPUT = "user_data/state.json"

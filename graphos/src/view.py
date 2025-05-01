@@ -1,9 +1,9 @@
 import curses
-from enum import Enum
 import json
 import logging
+from pathlib import Path
 
-from graphos.src.constants import LOG_OUTPUT, MOUSE_OUTPUT
+from graphos.src.constants import LOG_OUTPUT, MOUSE_OUTPUT, SAVE_OUTPUT
 from graphos.src.cursor import Cursor
 from graphos.src.edge import Edge
 from graphos.src.menu import Menu
@@ -82,6 +82,7 @@ class View:
         self.keybindings[ord("e")] = self.new_edge
         self.keybindings[ord("c")] = self.reset
         self.keybindings[ord("z")] = self.save_state
+        self.keybindings[ord("l")] = self.load_state
         self.keybindings[ord("g")] = self.grab
         self.keybindings[ord("q")] = self.quit
 
@@ -161,11 +162,33 @@ class View:
     def save_state(self):
         # Save the current state
         state = {
-            "nodes": self.nodes,
-            "edges": self.edges,
+            "nodes": [ node.to_JSON() for node in self.nodes ],
+            "edges": [ edge.to_JSON() for edge in self.edges ],
         }
-        with open("resources/save.json", "w") as f:
+        logger.debug(f"Saving state: {state}")
+        logger.debug(f"Saving state to {SAVE_OUTPUT}")
+        Path(SAVE_OUTPUT).parent.mkdir(parents=True, exist_ok=True)
+        with open(SAVE_OUTPUT, "w") as f:
             f.write(json.dumps(state, indent=4))
+
+    def load_state(self):
+        # Load the state from the file
+        try:
+            with open(SAVE_OUTPUT, "r") as f:
+                state = json.load(f)
+                logger.debug(f"Loaded state: {state}")
+                for node in state["nodes"]:
+                    self.nodes.append(Node.from_JSON(node))
+                for edge in state["edges"]:
+                    self.edges.append(Edge.from_JSON(edge))
+        except FileNotFoundError:
+            logger.debug(f"State file {SAVE_OUTPUT} not found.")
+        except json.JSONDecodeError:
+            logger.debug(f"Error decoding JSON from {SAVE_OUTPUT}.")
+        except Exception as e:
+            logger.debug(f"Error loading state: {e}")
+            logger.debug(f"State file {SAVE_OUTPUT} may be corrupted.")
+            return
 
     def pan_left(self):
         self.offset.x -= 1

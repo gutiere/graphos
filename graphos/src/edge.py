@@ -220,3 +220,12 @@ class Edge:
 
     def render(self, stdscr, offset):
         self.connect_nodes(stdscr, self.source, self.target, offset)
+
+    def to_JSON(self):
+        return {
+            "source": self.source.to_JSON(),
+            "target": self.target.to_JSON(),
+        }
+    def from_JSON(self, data):
+        self.source = Node.from_JSON(data["source"])
+        self.target = Node.from_JSON(data["target"])
