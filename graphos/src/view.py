@@ -316,14 +316,14 @@ class View:
 
     def handle_mouse_event(self):
         event = curses.getmouse()
-        if event[4] != 134217728 and event[4] != 524288:
+        if event[4] != 134217728 and event[4] != 524288:  # Skip noisy movement events
             logger.debug(f"Mouse event: {event}")
             with open(MOUSE_OUTPUT, "a") as f:
                 f.write(f"{event}\n")
         y = event[2]
         x = event[1]
         event_type = event[4]
-        # For some reason, scroll up and down events aren't beign captured consistently
+        # For some reason, scroll up and down events aren't being captured consistently
         # if event_type == 134217728:
         #     # Scroll down
         #     self.offset.y += 1
