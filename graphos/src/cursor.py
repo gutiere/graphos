@@ -38,8 +38,8 @@ class Cursor:
 
         """
 
-        normalized_x = self.x + offset.x
-        normalized_y = self.y + offset.y
+        normalized_x = self.x
+        normalized_y = self.y
 
         if normalized_x >= stdscr.getmaxyx()[1]:
             self.x = stdscr.getmaxyx()[1] - 2

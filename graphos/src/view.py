@@ -252,7 +252,11 @@ class View:
             modal.render()
 
             new_node = Node(
-                x=self.cursor.x + self.offset.x, y=self.cursor.y + self.offset.y, width=10, height=4, value=modal.title
+                x=self.cursor.x + self.offset.x,
+                y=self.cursor.y + self.offset.y,
+                width=10,
+                height=4,
+                value=modal.title,
             )
             self.nodes.append(new_node)
 
@@ -261,13 +265,20 @@ class View:
 
     def handle_mouse_event(self):
         event = curses.getmouse()
-        if event[4] != 134217728 and event[4] != 524288: # These are mouse scroll events, will be nice to add later
+        if event[4] != 134217728 and event[4] != 524288:
             logger.debug(f"Mouse event: {event}")
             with open(MOUSE_OUTPUT, "a") as f:
                 f.write(f"{event}\n")
         y = event[2]
         x = event[1]
         event_type = event[4]
+        # For some reason, scroll up and down events aren't beign captured consistently
+        # if event_type == 134217728:
+        #     # Scroll down
+        #     self.offset.y += 1
+        # elif event_type == 524288:
+        #     # Scroll up
+        #     self.offset.y -= 1
         if event_type == 2:  # Mouse button pressed
             self.set_last_mouse_press(x, y)
             self.cursor.grab = True
