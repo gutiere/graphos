@@ -210,7 +210,7 @@ class View:
             self.cursor.x -= 1
 
     def move_cursor_right(self):
-        if self.cursor.x < self.window.getmaxyx[1] - 3:
+        if self.cursor.x < self.window.getmaxyx()[1] - 3:
             if self.cursor.grab:
                 for node in self.nodes:
                     if node.grabbed:
