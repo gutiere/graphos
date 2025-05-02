@@ -106,7 +106,12 @@ class Node:
             return
 
         stdscr.attron(curses.color_pair(color))
-        rectangle(stdscr, uly, ulx, lry, lrx)
+        try:
+            rectangle(stdscr, uly, ulx, lry, lrx)
+        except curses.error:
+            # TODO: Debug why this is causing errors. Reproduced when panning a collection of noded down and to the right
+            # Handle the case where rectangle goes out of bounds
+            pass
 
         # Draw edge connectors
         if self.bottom_edge and normalized_y_end < max_y and self.center[0] < max_x:
