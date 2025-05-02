@@ -261,7 +261,7 @@ class View:
 
     def handle_mouse_event(self):
         event = curses.getmouse()
-        if event[4] != 134217728 or event[4] != 524288: # These are mouse scroll events, will be nice to add later
+        if event[4] != 134217728 and event[4] != 524288: # These are mouse scroll events, will be nice to add later
             logger.debug(f"Mouse event: {event}")
             with open(MOUSE_OUTPUT, "a") as f:
                 f.write(f"{event}\n")
