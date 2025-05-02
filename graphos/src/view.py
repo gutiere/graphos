@@ -120,6 +120,57 @@ class View:
         # Draw border around the window
         self.window.border(0)
 
+        # Draw out of view indicator
+        number_of_nodes_left_of_pan = 0
+        number_of_nodes_right_of_pan = 0
+        number_of_nodes_above_pan = 0
+        number_of_nodes_below_pan = 0
+        for node in self.nodes:
+            if node.right <= self.offset.x:
+                number_of_nodes_left_of_pan += 1
+            if node.left >= self.offset.x + self.window.getmaxyx()[1]:
+                number_of_nodes_right_of_pan += 1
+            if node.bottom <= self.offset.y:
+                number_of_nodes_above_pan += 1
+            if node.top >= self.offset.y + self.window.getmaxyx()[0]:
+                number_of_nodes_below_pan += 1
+        if number_of_nodes_left_of_pan > 0:
+            self.window.addstr(self.window.getmaxyx()[0] // 2 - 2, 0, "←")
+            self.window.addstr(
+                self.window.getmaxyx()[0] // 2, 0, str(number_of_nodes_left_of_pan)
+            )
+            self.window.addstr(self.window.getmaxyx()[0] // 2 + 2, 0, "←")
+        if number_of_nodes_right_of_pan > 0:
+            self.window.addstr(
+                self.window.getmaxyx()[0] // 2 - 2, self.window.getmaxyx()[1] - 1, "→"
+            )
+            self.window.addstr(
+                self.window.getmaxyx()[0] // 2,
+                self.window.getmaxyx()[1] - 1,
+                str(number_of_nodes_right_of_pan),
+            )
+            self.window.addstr(
+                self.window.getmaxyx()[0] // 2 + 2, self.window.getmaxyx()[1] - 1, "→"
+            )
+        if number_of_nodes_above_pan > 0:
+            self.window.addstr(0, self.window.getmaxyx()[1] // 2 - 2, "↑")
+            self.window.addstr(
+                0, self.window.getmaxyx()[1] // 2, str(number_of_nodes_above_pan)
+            )
+            self.window.addstr(0, self.window.getmaxyx()[1] // 2 + 2, "↑")
+        if number_of_nodes_below_pan > 0:
+            self.window.addstr(
+                self.window.getmaxyx()[0] - 1, self.window.getmaxyx()[1] // 2 - 2, "↓"
+            )
+            self.window.addstr(
+                self.window.getmaxyx()[0] - 1,
+                self.window.getmaxyx()[1] // 2,
+                str(number_of_nodes_below_pan),
+            )
+            self.window.addstr(
+                self.window.getmaxyx()[0] - 1, self.window.getmaxyx()[1] // 2 + 2, "↓"
+            )
+
         # Draw border around the window
         self.menu.assess_window(
             self.window.getmaxyx()[1],
@@ -143,7 +194,7 @@ class View:
             self.cursor.y -= 1
 
     def move_cursor_down(self):
-        if self.cursor.y < self.window.getmaxyx[0] - 2:
+        if self.cursor.y < self.window.getmaxyx()[0] - 2:
             if self.cursor.grab:
                 for node in self.nodes:
                     if node.grabbed:
