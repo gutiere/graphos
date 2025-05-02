@@ -52,7 +52,7 @@ class Modal:
                 )
         self.window.refresh()
 
-    def render_border(self):
+    def render_border(self) -> None:
         """
         Draws the border for the provided modal.
         """
@@ -74,7 +74,7 @@ class Modal:
         self.window.refresh()
         self.window.attroff(curses.color_pair(4))
 
-    def render(self):
+    def render(self) -> None:
         """
         Renders the Modal outline and internal content.
         """
