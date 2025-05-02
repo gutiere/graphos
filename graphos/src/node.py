@@ -1,6 +1,5 @@
 import curses
 from curses.textpad import rectangle
-import logging
 import uuid
 
 from graphos.src.utils import get_safe_x, get_safe_y
@@ -45,11 +44,13 @@ class Node:
         self.width = max(self.width, len(self.value) + 2)
         self.height = max(self.height, 1)
 
-    def assess_position(self, cursor):
-        self.focused = self.left <= cursor.x <= self.right and self.top <= cursor.y <= self.bottom
+    def assess_position(self, cursor, offset):
+        self.focused = (
+            self.left - offset.x <= cursor.x <= self.right - offset.x
+            and self.top - offset.y <= cursor.y <= self.bottom - offset.y
+        )
         if not self.focused:
             self.grabbed = False
-
 
     def move(self, dx, dy):
         self.x += dx
@@ -77,7 +78,7 @@ class Node:
     def get_value_coordinate(self, offset):
         padding = (self.width - len(self.value)) // 2
 
-        return (self.x + offset.x + padding + 1, self.center_y + offset.y)
+        return (self.x - offset.x + padding + 1, self.center_y - offset.y)
 
     def render(self, stdscr: curses.window, offset):
 
@@ -91,10 +92,10 @@ class Node:
         elif self.focused:
             color = self.focus_color
 
-        normalized_x = self.x + offset.x
-        normalized_y = self.y + offset.y
-        normalized_y_end = self.y + self.height + offset.y
-        normalized_x_end = self.x + self.width + offset.x
+        normalized_x = self.x - offset.x
+        normalized_y = self.y - offset.y
+        normalized_y_end = self.y + self.height - offset.y
+        normalized_x_end = self.x + self.width - offset.x
 
         uly = get_safe_y(stdscr, normalized_y)
         ulx = get_safe_x(stdscr, normalized_x)
@@ -107,29 +108,28 @@ class Node:
         stdscr.attron(curses.color_pair(color))
         rectangle(stdscr, uly, ulx, lry, lrx)
 
-
         # Draw edge connectors
         if self.bottom_edge and normalized_y_end < max_y and self.center[0] < max_x:
             stdscr.addch(
                 get_safe_y(stdscr, normalized_y_end),
-                get_safe_x(stdscr, self.center[0] + offset.x),
+                get_safe_x(stdscr, self.center[0] - offset.x),
                 curses.ACS_TTEE,
             )
         if self.top_edge and normalized_y > 0 and self.center[0] < max_x:
             stdscr.addch(
                 get_safe_y(stdscr, normalized_y),
-                get_safe_x(stdscr, self.center[0] + offset.x),
+                get_safe_x(stdscr, self.center[0] - offset.x),
                 curses.ACS_BTEE,
             )
         if self.left_edge and normalized_x > 0 and self.center[1] < max_y:
             stdscr.addch(
-                get_safe_y(stdscr, self.center[1] + offset.y),
+                get_safe_y(stdscr, self.center[1] - offset.y),
                 get_safe_x(stdscr, normalized_x),
                 curses.ACS_RTEE,
             )
         if self.right_edge and normalized_x_end < max_x and self.center[1] < max_y:
             stdscr.addch(
-                get_safe_y(stdscr, self.center[1] + offset.y),
+                get_safe_y(stdscr, self.center[1] - offset.y),
                 get_safe_x(stdscr, normalized_x_end),
                 curses.ACS_LTEE,
             )
@@ -138,7 +138,10 @@ class Node:
 
         # Draw label
         is_trunctated = (
-            normalized_y < 0 or normalized_x < 0 or normalized_y_end > max_y or normalized_x_end > max_x
+            normalized_y < 0
+            or normalized_x < 0
+            or normalized_y_end > max_y
+            or normalized_x_end > max_x
         )
         if not is_trunctated:
             stdscr.addstr(
@@ -146,6 +149,7 @@ class Node:
                 self.get_value_coordinate(offset)[0],
                 self.value,
             )
+
     def to_JSON(self):
         return {
             "id": self.id,
@@ -158,6 +162,7 @@ class Node:
             "focused": self.focused,
             "selected": self.selected,
         }
+
     @staticmethod
     def from_JSON(data):
         if not isinstance(data, dict):
@@ -167,7 +172,7 @@ class Node:
             y=data["y"],
             width=data["width"],
             height=data["height"],
-            value=data["value"]
+            value=data["value"],
         )
         new_node.grabbed = data["grabbed"]
         new_node.focused = data["focused"]

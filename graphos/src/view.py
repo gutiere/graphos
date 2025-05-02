@@ -104,7 +104,7 @@ class View:
 
         # Update nodes of cursor state
         for node in self.nodes:
-            node.assess_position(self.cursor)
+            node.assess_position(self.cursor, self.offset)
 
         for edge in self.edges:
             edge.render(self.window, self.offset)
@@ -199,19 +199,19 @@ class View:
 
     def pan_left(self):
         self.offset.x -= 1
-        self.cursor.x += 1
+        # self.cursor.x += 1
 
     def pan_right(self):
         self.offset.x += 1
-        self.cursor.x -= 1
+        # self.cursor.x -= 1
 
     def pan_up(self):
         self.offset.y -= 1
-        self.cursor.y += 1
+        # self.cursor.y += 1
 
     def pan_down(self):
         self.offset.y += 1
-        self.cursor.y -= 1
+        # self.cursor.y -= 1
 
     def grab(self):
         # Grab the rectangle
@@ -252,7 +252,7 @@ class View:
             modal.render()
 
             new_node = Node(
-                x=self.cursor.x, y=self.cursor.y, width=10, height=4, value=modal.title
+                x=self.cursor.x + self.offset.x, y=self.cursor.y + self.offset.y, width=10, height=4, value=modal.title
             )
             self.nodes.append(new_node)
 
@@ -272,14 +272,14 @@ class View:
             self.set_last_mouse_press(x, y)
             self.cursor.grab = True
             for node in self.nodes:
-                node.assess_position(self.cursor)
+                node.assess_position(self.cursor, self.offset)
                 if node.focused:
                     node.grabbed = True
         elif event_type == 1:  # Mouse button released
             last_mouse_press = self.get_last_mouse_press()
             self.cursor.grab = False
             for node in self.nodes:
-                node.assess_position(self.cursor)
+                node.assess_position(self.cursor, self.offset)
                 if node.focused:
                     logger.debug(f"x: {x}, y: {y}")
                     logger.debug(

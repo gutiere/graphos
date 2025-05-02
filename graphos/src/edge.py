@@ -2,6 +2,7 @@ import uuid
 from graphos.src.node import Node
 import curses
 
+from graphos.src.offset import Offset
 from graphos.src.utils import get_safe_x, get_safe_y
 
 
@@ -63,8 +64,8 @@ class Edge:
             )
             h_line_y = bottom_node.center_y - y_diff_2 - bottom_node.height // 2
 
-            h_line_x_end = get_safe_x(win, h_line_x + x_diff)
-            h_line_x = get_safe_x(win, h_line_x)
+            h_line_x_end = h_line_x + x_diff
+            h_line_x = h_line_x
 
             lines.append(
                 {
@@ -146,8 +147,8 @@ class Edge:
                 else top_node.center_y + 1
             )
 
-            v_line_y_end = get_safe_y(win, v_line_y + y_diff)
-            v_line_y = get_safe_y(win, v_line_y)
+            v_line_y_end = v_line_y + y_diff
+            v_line_y = v_line_y
 
             lines.append(
                 {
@@ -184,18 +185,19 @@ class Edge:
 
         return lines
 
-    def connect_nodes(self, win: curses.window, node_1: Node, node_2: Node, offset):
+    def connect_nodes(
+        self, win: curses.window, node_1: Node, node_2: Node, offset: Offset
+    ):
 
         lines = self.get_line_breakdown(win, node_1, node_2)
 
         for line in lines:
 
-            normalized_x = line["x"] + offset.x
-            normalized_y = line["y"] + offset.y
+            normalized_x = line["x"] - offset.x
+            normalized_y = line["y"] - offset.y
 
             diff_deduction_x = abs(get_safe_x(win, normalized_x) - normalized_x)
             diff_deduction_y = abs(get_safe_y(win, normalized_y) - normalized_y)
-
 
             if line["type"] == "vertical":
                 win.vline(
@@ -212,7 +214,12 @@ class Edge:
                     line["length"] - diff_deduction_x,
                 )
             else:
-                if normalized_x < 0 or normalized_y < 0 or normalized_x >= win.getmaxyx()[1] or normalized_y >= win.getmaxyx()[0]:
+                if (
+                    normalized_x < 0
+                    or normalized_y < 0
+                    or normalized_x >= win.getmaxyx()[1]
+                    or normalized_y >= win.getmaxyx()[0]
+                ):
                     continue
                 win.addch(
                     get_safe_y(win, normalized_y),
@@ -241,7 +248,7 @@ class Edge:
             "source": self.source.to_JSON(),
             "target": self.target.to_JSON(),
         }
-    
+
     @staticmethod
     def from_JSON(data: dict[str:any], nodes: list[Node]) -> "Edge":
         """
@@ -255,15 +262,25 @@ class Edge:
         if not isinstance(data, dict):
             raise ValueError("Invalid data format. Expected a dictionary.")
         if "source" not in data or "target" not in data:
-            raise ValueError("Invalid data format. Expected 'source' and 'target' keys.")
+            raise ValueError(
+                "Invalid data format. Expected 'source' and 'target' keys."
+            )
         if not isinstance(data["source"], dict) or not isinstance(data["target"], dict):
-            raise ValueError("Invalid data format. Expected 'source' and 'target' to be dictionaries.")
+            raise ValueError(
+                "Invalid data format. Expected 'source' and 'target' to be dictionaries."
+            )
         if "id" not in data["source"] or "id" not in data["target"]:
-            raise ValueError("Invalid data format. Expected 'id' key in 'source' and 'target'.")
-        source_node = next((node for node in nodes if node.id == data["source"]["id"]), None)
+            raise ValueError(
+                "Invalid data format. Expected 'id' key in 'source' and 'target'."
+            )
+        source_node = next(
+            (node for node in nodes if node.id == data["source"]["id"]), None
+        )
         if source_node is None:
             raise ValueError(f"Node with id {data['source']['id']} not found.")
-        target_node = next((node for node in nodes if node.id == data["target"]["id"]), None)
+        target_node = next(
+            (node for node in nodes if node.id == data["target"]["id"]), None
+        )
         if target_node is None:
             raise ValueError(f"Node with id {data['target']['id']} not found.")
         new_edge = Edge(

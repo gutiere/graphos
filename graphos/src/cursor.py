@@ -57,11 +57,5 @@ class Cursor:
             stdscr: curses.window object for current screen size
             offset: Offset calculator for rendering
         """
-
-        normalized_x = self.x + offset.x
-        normalized_y = self.y + offset.y
-        normalized_x = get_safe_x(stdscr, normalized_x)
-        normalized_y = get_safe_y(stdscr, normalized_y)
-
         symbol = self.grab_symbol if self.grab else self.symbol
-        stdscr.addstr(normalized_y, normalized_x, symbol)
+        stdscr.addstr(get_safe_y(stdscr, self.y), get_safe_x(stdscr, self.x), symbol)
