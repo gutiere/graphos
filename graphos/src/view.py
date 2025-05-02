@@ -353,9 +353,16 @@ class View:
                         self.select_node(node)
                     node.grabbed = False
         if self.cursor.grab:
+            node_grabbed = False
             for node in self.nodes:
                 if node.grabbed:
+                    node_grabbed = True
                     node.move(x - self.cursor.x, y - self.cursor.y)
+
+            # If no node is grabbed, pan
+            if not node_grabbed:
+                self.offset.x -= x - self.cursor.x
+                self.offset.y -= y - self.cursor.y
 
         self.cursor.x = x
         self.cursor.y = y
