@@ -187,7 +187,7 @@ class View:
                 for node in state["nodes"]:
                     self.nodes.append(Node.from_JSON(node))
                 for edge in state["edges"]:
-                    self.edges.append(Edge.from_JSON(edge))
+                    self.edges.append(Edge.from_JSON(edge, self.nodes))
         except FileNotFoundError:
             logger.debug(f"State file {SAVE_OUTPUT} not found.")
         except json.JSONDecodeError:
@@ -261,7 +261,7 @@ class View:
 
     def handle_mouse_event(self):
         event = curses.getmouse()
-        if event[4] != 134217728:
+        if event[4] != 134217728 or event[4] != 524288: # These are mouse scroll events, will be nice to add later
             logger.debug(f"Mouse event: {event}")
             with open(MOUSE_OUTPUT, "a") as f:
                 f.write(f"{event}\n")

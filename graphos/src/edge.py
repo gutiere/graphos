@@ -6,10 +6,10 @@ from graphos.src.utils import get_safe_x, get_safe_y
 
 
 class Edge:
-    def __init__(self, source: Node, target: Node):
-        self.id = str(uuid.uuid4())
+    def __init__(self, source: Node, target: Node, id: str = None):
         self.source = source
         self.target = target
+        self.id = id if id else str(uuid.uuid4())
 
     def get_line_breakdown(self, win: curses.window, node_1: Node, node_2: Node):
         left_node = node_1 if node_1.x < node_2.x else node_2
@@ -221,9 +221,21 @@ class Edge:
                 )
 
     def render(self, stdscr, offset):
+        """
+        Render the edge on the given window.
+        Args:
+            stdscr (curses.window): The window to render the edge on.
+            offset (Point): The offset to apply to the edge's coordinates.
+        """
         self.connect_nodes(stdscr, self.source, self.target, offset)
 
     def to_JSON(self):
+        """
+        Convert the Edge object to a JSON-like dictionary.
+        Returns:
+            dict: A dictionary representation of the Edge object.
+        """
+
         return {
             "id": self.id,
             "source": self.source.to_JSON(),
@@ -231,7 +243,15 @@ class Edge:
         }
     
     @staticmethod
-    def from_JSON(data):
+    def from_JSON(data: dict[str:any], nodes: list[Node]) -> "Edge":
+        """
+        Create an Edge object from a JSON-like dictionary.
+        Args:
+            data (dict): A dictionary containing the edge data.
+            nodes (list): A list of Node objects to find the source and target nodes.
+        Returns:
+            Edge: An Edge object created from the provided data.
+        """
         if not isinstance(data, dict):
             raise ValueError("Invalid data format. Expected a dictionary.")
         if "source" not in data or "target" not in data:
@@ -240,10 +260,15 @@ class Edge:
             raise ValueError("Invalid data format. Expected 'source' and 'target' to be dictionaries.")
         if "id" not in data["source"] or "id" not in data["target"]:
             raise ValueError("Invalid data format. Expected 'id' key in 'source' and 'target'.")
-        
+        source_node = next((node for node in nodes if node.id == data["source"]["id"]), None)
+        if source_node is None:
+            raise ValueError(f"Node with id {data['source']['id']} not found.")
+        target_node = next((node for node in nodes if node.id == data["target"]["id"]), None)
+        if target_node is None:
+            raise ValueError(f"Node with id {data['target']['id']} not found.")
         new_edge = Edge(
-            source=Node.from_JSON(data["source"]),
-            target=Node.from_JSON(data["target"])
+            source=source_node,
+            target=target_node,
+            id=data["id"],
         )
-        new_edge.id = data["id"]
         return new_edge

@@ -10,7 +10,6 @@ class Menu:
 
     def render(self, stdscr):
         hud_string = f" ({self.x}/{self.window_width}, {self.y}/{self.window_height}) "
-        # hud_string = f" {(self.x, self.y)} | {self.window_height} x {self.window_width} "
         stdscr.addstr(
             self.window_height - 1,
             self.window_width - len(hud_string) - 1,
