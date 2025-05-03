@@ -9,6 +9,7 @@ from curses import wrapper, window
 
 from graphos.src.constants import LOG_OUTPUT, MOUSE_OUTPUT
 from graphos.src.view import View
+import argparse
 
 
 def setup_logging() -> None:
@@ -23,12 +24,27 @@ def setup_logging() -> None:
     )
 
 
-def main(stdscr: window) -> None:
+def setup_args() -> argparse.Namespace:
+    """Sets up command line arguments for the utility
+
+    Returns: Namespace object containing parsed arguments
+    """
+    parser = argparse.ArgumentParser(description="Graphos Utility")
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Enable debug mode",
+    )
+    return parser.parse_args()
+
+
+def main(window: window) -> None:
     """Operates as the main execution loop for utility
 
     Args: stdscr: window object for interfacing with terminal
     """
-    view = View(stdscr)
+    args = setup_args()
+    view = View(window, args)
     view.loop()
 
 

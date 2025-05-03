@@ -10,9 +10,14 @@ class Edge:
     def __init__(self, source: Node, target: Node, id: str = None):
         self.source = source
         self.target = target
+
         self.id = id if id else str(uuid.uuid4())
 
-    def get_line_breakdown(self, win: curses.window, node_1: Node, node_2: Node):
+    def __str__(self):
+        return f"Edge({self.source}, {self.target})"
+
+    def get_line_breakdown(self):
+        node_1, node_2 = self.source, self.target
         left_node = node_1 if node_1.x < node_2.x else node_2
         right_node = node_2 if node_1.x < node_2.x else node_1
         top_node = node_1 if node_1.y < node_2.y else node_2
@@ -28,14 +33,15 @@ class Edge:
             vertical_bias = True
             top_node.reset_edges()
             bottom_node.reset_edges()
-            top_node.bottom_edge = True
-            bottom_node.top_edge = True
+            # TODO: Fix the fact that deleting the edge doesn't reset the node edge characters
+            # top_node.bottom_edge = True
+            # bottom_node.top_edge = True
         else:
             horizontal_bias = True
             left_node.reset_edges()
             right_node.reset_edges()
-            left_node.right_edge = True
-            right_node.left_edge = True
+            # left_node.right_edge = True
+            # right_node.left_edge = True
 
         lines = []
         if vertical_bias:
@@ -185,11 +191,9 @@ class Edge:
 
         return lines
 
-    def connect_nodes(
-        self, win: curses.window, node_1: Node, node_2: Node, offset: Offset
-    ):
+    def connect_nodes(self, win: curses.window, offset: Offset):
 
-        lines = self.get_line_breakdown(win, node_1, node_2)
+        lines = self.get_line_breakdown()
 
         for line in lines:
 
@@ -234,7 +238,7 @@ class Edge:
             stdscr (curses.window): The window to render the edge on.
             offset (Point): The offset to apply to the edge's coordinates.
         """
-        self.connect_nodes(stdscr, self.source, self.target, offset)
+        self.connect_nodes(stdscr, offset)
 
     def to_JSON(self):
         """

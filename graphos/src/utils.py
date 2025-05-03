@@ -29,3 +29,10 @@ def get_safe_y(
     elif y >= max_y:
         return max_y - 1
     return y
+
+
+def clear_section(window, uly, ulx, lry, lrx):
+    for y in range(uly, lry):
+        for x in range(ulx, lrx):
+            window.addch(get_safe_y(window, y), get_safe_x(window, x), " ")
+    window.refresh()
