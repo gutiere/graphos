@@ -22,6 +22,7 @@ logging.basicConfig(
 class Menu:
     """
     Menu serves as the main pane for drawing in the target terminal.
+    This includes the border as well as helpful HUD information.
 
     Attributes:
         options: list[str] set of available actions
