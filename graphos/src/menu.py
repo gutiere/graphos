@@ -73,7 +73,7 @@ class Menu:
         if self.x + self.width > self.window.getmaxyx()[1]:
             self.x = self.window.getmaxyx()[1] - self.width - 2
 
-    def assess_position(self, x: int, y: int):
+    def assess_position(self, x: int, y: int) -> None:
         """
         Checks provided location against known option boundaries.
         Sets option if it is within stored boundaries.
@@ -94,14 +94,26 @@ class Menu:
             self.selected_option = -1
 
     def is_focused(self, x: int, y: int) -> bool:
-        """Check if the mouse event is within the menu dimensions."""
+        """
+        Check if the mouse event is within the menu dimensions.
+        
+        Args:
+            x: int x coordinate
+            y: int y coordinate
+        """
         return (
             self.dimensions["uly"] <= y < self.dimensions["lry"]
             and self.dimensions["ulx"] <= x < self.dimensions["lrx"]
         )
 
     def get_clicked_option(self, x: int, y: int) -> int:
-        """Get the clicked option based on mouse event coordinates."""
+        """
+        Get the clicked option based on mouse event coordinates.
+        
+        Args:
+            x: int x coordinate
+            y: int y coordinate
+        """
         for i, dimensions in enumerate(self.options_dimensions):
             if (
                 dimensions["uly"] <= y < dimensions["lry"]
@@ -111,7 +123,9 @@ class Menu:
         return -1
 
     def render(self) -> None:
-        """Draws the menu content in the terminal"""
+        """
+        Draws the menu content in the terminal.
+        """
         clear_section(self.window, **self.dimensions)
         try:
             rectangle(self.window, **self.dimensions)
