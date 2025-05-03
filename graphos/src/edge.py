@@ -77,7 +77,7 @@ class Edge:
             bottom_node: Node that is lower in pair
 
         Returns:
-            Tuple of ASCII ints
+            Tuple of ASCII ints/None
         """
         top_corner = None
         bottom_corner = None
