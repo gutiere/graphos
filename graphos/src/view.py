@@ -351,7 +351,7 @@ class View:
         exit(0)
 
     def open_create_menu(self):
-        options = ["Create node", "Create edge"]
+        options = ["Create node", "Create edge", "Close menu"]
         if len(self.selected_nodes) != 2:
             options.remove("Create edge")
 
@@ -363,13 +363,7 @@ class View:
         )
 
     def open_menu(self, x: int, y: int):
-        options = [
-            "Create >",
-            "Delete selected",
-            "Save",
-            "Load",
-            "Quit",
-        ]
+        options = ["Create >", "Delete selected", "Save", "Load", "Quit", "Close menu"]
 
         if len(self.selected_nodes) == 0:
             options.remove("Delete selected")
@@ -407,6 +401,10 @@ class View:
             node.assess_position(self.cursor, self.offset)
             node.grabbed = node.focused
 
+    def close_menu(self):
+        if self.menu:
+            self.menu = None
+
     def handle_mouse_release(self, x: int, y: int):
         self.cursor.grab = False
         last_mouse_press = self.get_last_mouse_press()
@@ -436,6 +434,7 @@ class View:
                 menu_option_mapping["Save"] = self.save_state
                 menu_option_mapping["Load"] = self.load_state
                 menu_option_mapping["Quit"] = self.quit
+                menu_option_mapping["Close menu"] = self.close_menu
                 menu_option_mapping["Create >"] = self.open_create_menu
 
                 logger.debug(f"Clicked menu option: {menu_option}")
@@ -468,8 +467,9 @@ class View:
             self.handle_mouse_release(x, y)
         elif event_type == 134217728:  # Mouse moved:
 
-            if self.menu and not self.menu.is_focused(x, y):
-                self.menu = None
+            # If the menu is open and the mouse is outside of it, close the menu
+            # if self.menu and not self.menu.is_focused(x, y):
+            #     self.menu = None
 
             if self.cursor.grab:
                 node_grabbed = False
