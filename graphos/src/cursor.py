@@ -21,12 +21,16 @@ class Cursor:
         grab_symbol: visual representation for when grabbing objects
     """
 
-    def __init__(self, x: int, y: int) -> None:
+    def __init__(self, x: int, y: int, args: dict[str:str]) -> None:
         self.x = x
         self.y = y
         self.grab = False
         self.color = 1
-        self.symbol = "🐁"
+        self.args = args
+        if args.debug:
+            self.symbol = "x"
+        else:
+            self.symbol = ""
         self.grab_symbol = "👊"
 
     def assess_position(self, stdscr: window, offset: Offset) -> None:
@@ -58,9 +62,8 @@ class Cursor:
             offset: Offset calculator for rendering
         """
         symbol = self.grab_symbol if self.grab else self.symbol
-        symbol_offset = 1  # This is used to account for some emoji cursors being wider than normal characters
         stdscr.addstr(
             get_safe_y(stdscr, self.y),
-            get_safe_x(stdscr, self.x - symbol_offset),
+            get_safe_x(stdscr, self.x),
             symbol,
         )
