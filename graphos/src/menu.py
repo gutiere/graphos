@@ -22,7 +22,7 @@ logging.basicConfig(
 class Menu:
     """
     Menu serves as the main pane for drawing in the target terminal.
-    This includes the border as well as helpful HUD information.
+    This includes helpful HUD information.
 
     Attributes:
         options: list[str] set of available actions
@@ -31,6 +31,7 @@ class Menu:
         y: int current y coordinate
         dimensions: dict boundary coordinates for menu
         option_dimensions: list dict object containing coordinate sizes of each option
+        selected_option: indicates current user selected option based on cursor location
     """
 
     def __init__(self, options: list[str], x: int, y: int, window: curses.window):
@@ -39,7 +40,7 @@ class Menu:
         self.window = window
         self.x = x
         self.y = y
-        self.correct_dimentions()
+        self.correct_dimensions()
         self.dimensions = {
             "uly": self.y,
             "ulx": self.x,
@@ -58,7 +59,11 @@ class Menu:
             )
         self.selected_option = -1
 
-    def correct_dimentions(self):
+    def correct_dimensions(self) -> None:
+        """
+        Sanitizes coordinates to be within window.
+        Sets x and y attributes.
+        """
         if self.y <= 0:
             self.y = 1
         if self.x <= 0:
@@ -71,7 +76,7 @@ class Menu:
     def assess_position(self, x: int, y: int):
         """
         Checks provided location against known option boundaries.
-        Sets option if it is within stored boundaries
+        Sets option if it is within stored boundaries.
 
         Args:
             x: int x coordinate
