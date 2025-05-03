@@ -1,5 +1,5 @@
 """
-Offset module Establishes the offset for the given terminal being used
+Offset module is used to help calculate the offset of rendered items when panning the view.
 """
 
 from dataclasses import dataclass
@@ -8,8 +8,8 @@ from dataclasses import dataclass
 @dataclass
 class Offset:
     """
-    Offset object contains the x and y coordinate offset definitions
-
+    Offset object contains the x and y coordinate offset definitions to track panning movements.
+    
     Attributes:
         x: int x coordinate
         y: int y coordinate

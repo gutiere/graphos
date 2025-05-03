@@ -14,7 +14,7 @@ from graphos.src.utils import clear_section
 
 class Modal:
     """
-    Defines the popup block for a new modal pane
+    Defines the popup pane for a new modal.
 
     Attributes:
         window: curse.window for current terminal
@@ -61,7 +61,7 @@ class Modal:
 
     def render(self) -> None:
         """
-        Renders the Modal outline and internal content.
+        Renders the Modal.
         """
         self.render_border()
         self.window.addstr(self.y + 1, self.x + 2, self.title)
