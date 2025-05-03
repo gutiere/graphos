@@ -22,7 +22,12 @@ logging.basicConfig(
 
 
 class View:
-    def __init__(self, window: curses.window):
+    def __init__(self, window: curses.window, args: dict[str:str]) -> None:
+
+        logger.debug("Initializing View")
+        logger.debug(f"Start with args: {args}")
+        self.args = args
+
         self.window = window
         # Enable mouse events
         curses.mouseinterval(0)  # Set mouse interval to 0 for immediate response
@@ -43,7 +48,7 @@ class View:
         self.nodes: list[Node] = []
         self.edges: list[Edge] = []
 
-        self.cursor = Cursor(window_width // 2, window_height // 2)
+        self.cursor = Cursor(window_width // 2, window_height // 2, self.args)
         self.hud = Hud(window_width, window_height, self.cursor.x, self.cursor.y)
         self.selected_nodes = []
         self.offset = Offset(0, 0)
@@ -101,7 +106,7 @@ class View:
 
     def render(self):
 
-        # Clear the window
+        # # Clear the window
         self.window.clear()
 
         # Update nodes of cursor state
@@ -339,6 +344,7 @@ class View:
                 width=10,
                 height=4,
                 value=modal.title,
+                args=self.args,
             )
             self.nodes.append(new_node)
 
@@ -366,6 +372,9 @@ class View:
             "Quit",
         ]
 
+        if len(self.selected_nodes) == 0:
+            options.remove("Delete selected")
+
         self.menu = Menu(
             options,
             x,
@@ -386,84 +395,97 @@ class View:
         logger.debug(f"Clicked option: {menu_option}")
         return menu_option
 
-    def handle_mouse_event(self):
-        event = curses.getmouse()
+    def log_mouse_event(self, event):
         if event[4] != 134217728 and event[4] != 524288:  # Skip noisy movement events
-            logger.debug(f"Mouse event: {event}")
             with open(MOUSE_OUTPUT, "a") as f:
                 f.write(f"{event}\n")
-        y = event[2]
-        x = event[1]
-        event_type = event[4]
-        # For some reason, scroll up and down events aren't being captured consistently
-        # if event_type == 134217728:
-        #     # Scroll down
-        #     self.offset.y += 1
-        # elif event_type == 524288:
-        #     # Scroll up
-        #     self.offset.y -= 1
-        if event_type == 2:  # Mouse button pressed
-            self.set_last_mouse_press(x, y)
-            self.cursor.grab = True
-            for node in self.nodes:
-                node.assess_position(self.cursor, self.offset)
-                if node.focused:
-                    node.grabbed = True
-        elif event_type == 1:  # Mouse button released
-            self.cursor.grab = False
-            last_mouse_press = self.get_last_mouse_press()
-            is_click = last_mouse_press is not None and last_mouse_press == (x, y)
-            if is_click:
-                logger.debug(f"Clicked at ({x}, {y})")
+            logger.debug(f"Mouse event: {event}")
+
+    def handle_mouse_press(self, x: int, y: int):
+        self.set_last_mouse_press(x, y)
+        self.cursor.grab = True
+        for node in self.nodes:
+            node.assess_position(self.cursor, self.offset)
+            node.grabbed = node.focused
+
+    def handle_mouse_release(self, x: int, y: int):
+        self.cursor.grab = False
+        last_mouse_press = self.get_last_mouse_press()
+        is_click = last_mouse_press is not None and last_mouse_press == (x, y)
+        if is_click:
+            logger.debug(f"Clicked at ({x}, {y})")
+        else:
+            self.menu = None
+
+        click_fulfilled = False
+        for node in self.nodes:
+            node.assess_position(self.cursor, self.offset)
+            if node.focused:
+                if is_click:
+                    self.select_node(node)
+                    click_fulfilled = True
+                node.grabbed = False
+
+        # If no node was clicked, show modal for creation
+        if not click_fulfilled and is_click:
+            if self.menu:
+                menu_option = self.get_clicked_menu_option(x, y)
+                menu_option_mapping = {}
+                menu_option_mapping["Create node"] = self.new_node
+                menu_option_mapping["Create edge"] = self.new_edge
+                menu_option_mapping["Delete selected"] = self.delete_selected
+                menu_option_mapping["Save"] = self.save_state
+                menu_option_mapping["Load"] = self.load_state
+                menu_option_mapping["Quit"] = self.quit
+                menu_option_mapping["Create >"] = self.open_create_menu
+
+                logger.debug(f"Clicked menu option: {menu_option}")
+                if menu_option in menu_option_mapping:
+                    menu_option_mapping[menu_option]()
+                    if menu_option != "Create >":
+                        self.menu = None
+                    click_fulfilled = True
+
+        if not click_fulfilled and is_click:
+            if self.menu is None:
+                self.open_menu(x, y)
             else:
                 self.menu = None
 
-            click_fulfilled = False
-            for node in self.nodes:
-                node.assess_position(self.cursor, self.offset)
-                if node.focused:
-                    if is_click:
-                        self.select_node(node)
-                        click_fulfilled = True
-                    node.grabbed = False
+    def unfocus_all_nodes(self):
+        for node in self.nodes:
+            node.focused = False
+            node.grabbed = False
+            node.selected = False
 
-            # If no node was clicked, show modal for creation
-            if not click_fulfilled and is_click:
-                if self.menu:
-                    menu_option = self.get_clicked_menu_option(x, y)
-                    menu_option_mapping = {}
-                    menu_option_mapping["Create node"] = self.new_node
-                    menu_option_mapping["Create edge"] = self.new_edge
-                    menu_option_mapping["Delete selected"] = self.delete_selected
-                    menu_option_mapping["Save"] = self.save_state
-                    menu_option_mapping["Load"] = self.load_state
-                    menu_option_mapping["Quit"] = self.quit
-                    menu_option_mapping["Create >"] = self.open_create_menu
+    def handle_mouse_event(self):
+        event = curses.getmouse()
+        self.log_mouse_event(event)
 
-                    if menu_option in menu_option_mapping:
-                        menu_option_mapping[menu_option]()
-                        if menu_option != "Create >":
-                            self.menu = None
-                        click_fulfilled = True
+        _, x, y, _, event_type = event
+        if event_type == 2:  # Mouse button pressed
+            self.handle_mouse_press(x, y)
+        elif event_type == 1:  # Mouse button released
+            self.handle_mouse_release(x, y)
+        elif event_type == 134217728:  # Mouse moved:
 
-            if not click_fulfilled and is_click:
-                if self.menu is None:
-                    self.open_menu(x, y)
-                else:
-                    self.menu = None
+            if self.menu and not self.menu.is_focused(x, y):
+                self.menu = None
 
-        if self.cursor.grab:
-            node_grabbed = False
-            for node in self.nodes:
-                if node.grabbed:
-                    node_grabbed = True
-                    node.move(x - self.cursor.x, y - self.cursor.y)
+            if self.cursor.grab:
+                node_grabbed = False
+                for node in self.nodes:
+                    if node.grabbed:
+                        node_grabbed = True
+                        node.move(x - self.cursor.x, y - self.cursor.y)
 
-            # If no node is grabbed, pan
-            if not node_grabbed:
-                self.offset.x -= x - self.cursor.x
-                self.offset.y -= y - self.cursor.y
+                # If no node is grabbed, pan
+                if not node_grabbed:
+                    self.offset.x -= x - self.cursor.x
+                    self.offset.y -= y - self.cursor.y
 
+        if self.args.debug:
+            logger.debug(f"Update cursor position to ({x}, {y})")
         self.cursor.x = x
         self.cursor.y = y
 

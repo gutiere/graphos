@@ -2,11 +2,11 @@ import curses
 from curses.textpad import rectangle
 import uuid
 
-from graphos.src.utils import get_safe_x, get_safe_y
+from graphos.src.utils import clear_section, get_safe_x, get_safe_y
 
 
 class Node:
-    def __init__(self, x, y, width, height, value=None):
+    def __init__(self, x, y, width, height, value=None, args=None):
         self.id = str(uuid.uuid4())
         self.value = value
         self.x = x
@@ -17,6 +17,7 @@ class Node:
         self.grabbed = False
         self.focused = False
         self.selected = False
+        self.args = args
         # self.color = 1 # Black
         # self.color = 2 # Red
         # self.color = 3 # Green
@@ -110,6 +111,13 @@ class Node:
 
         stdscr.attron(curses.color_pair(color))
         try:
+            clear_section(
+                stdscr,
+                uly,
+                ulx,
+                lry,
+                lrx,
+            )
             rectangle(stdscr, uly, ulx, lry, lrx)
         except curses.error:
             # TODO: Debug why this is causing errors. Reproduced when panning a collection of noded down and to the right
@@ -157,6 +165,29 @@ class Node:
                 self.get_value_coordinate(offset)[0],
                 self.value,
             )
+
+        # Draw state for debugging
+        if self.args.debug and (self.focused or self.selected):
+            display_strings = [
+                f"grabbed: {self.grabbed}",
+                f"focused: {self.focused}",
+                f"selected: {self.selected}",
+            ]
+            max_display_length = max(len(s) for s in display_strings)
+            right_x = self.right - offset.x + 2
+            left_x = self.left - offset.x - max_display_length - 2
+            x_coord = right_x if right_x < max_x - max_display_length else left_x
+            for i, display_string in enumerate(display_strings, start=-1):
+                y_coord = self.get_value_coordinate(offset)[1] + i
+                if x_coord < 0 or x_coord >= max_x - max_display_length:
+                    continue
+                if y_coord < 0 or y_coord >= max_y:
+                    continue
+                stdscr.addstr(
+                    y_coord,
+                    x_coord,
+                    display_string,
+                )
 
     def to_JSON(self):
         return {

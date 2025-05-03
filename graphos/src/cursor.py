@@ -21,12 +21,16 @@ class Cursor:
         grab_symbol: visual representation for when grabbing objects
     """
 
-    def __init__(self, x: int, y: int) -> None:
+    def __init__(self, x: int, y: int, args: dict[str:str]) -> None:
         self.x = x
         self.y = y
         self.grab = False
         self.color = 1
-        self.symbol = ""
+        self.args = args
+        if args.debug:
+            self.symbol = "x"
+        else:
+            self.symbol = ""
         self.grab_symbol = "👊"
 
     def assess_position(self, stdscr: window, offset: Offset) -> None:

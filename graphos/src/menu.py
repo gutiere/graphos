@@ -62,6 +62,13 @@ class Menu:
         else:
             self.selected_option = -1
 
+    def is_focused(self, x: int, y: int) -> bool:
+        """Check if the mouse event is within the menu dimensions."""
+        return (
+            self.dimensions["uly"] <= y < self.dimensions["lry"]
+            and self.dimensions["ulx"] <= x < self.dimensions["lrx"]
+        )
+
     def get_clicked_option(self, x: int, y: int) -> int:
         """Get the clicked option based on mouse event coordinates."""
         for i, dimensions in enumerate(self.options_dimensions):
