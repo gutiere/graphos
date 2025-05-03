@@ -62,9 +62,8 @@ class Cursor:
             offset: Offset calculator for rendering
         """
         symbol = self.grab_symbol if self.grab else self.symbol
-        symbol_offset = 1  # This is used to account for some emoji cursors being wider than normal characters
         stdscr.addstr(
             get_safe_y(stdscr, self.y),
-            get_safe_x(stdscr, self.x - symbol_offset),
+            get_safe_x(stdscr, self.x),
             symbol,
         )

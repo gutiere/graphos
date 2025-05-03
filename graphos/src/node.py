@@ -6,7 +6,7 @@ from graphos.src.utils import clear_section, get_safe_x, get_safe_y
 
 
 class Node:
-    def __init__(self, x, y, width, height, value=None, args=None):
+    def __init__(self, x, y, width, height, value=None, args={}):
         self.id = str(uuid.uuid4())
         self.value = value
         self.x = x
@@ -167,7 +167,7 @@ class Node:
             )
 
         # Draw state for debugging
-        if self.args.debug and (self.focused or self.selected):
+        if "debug" in self.args and self.args.debug and (self.focused or self.selected):
             display_strings = [
                 f"grabbed: {self.grabbed}",
                 f"focused: {self.focused}",

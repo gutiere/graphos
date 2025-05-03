@@ -47,13 +47,12 @@ class View:
 
         self.nodes: list[Node] = []
         self.edges: list[Edge] = []
-
-        self.cursor = Cursor(window_width // 2, window_height // 2, self.args)
-        self.hud = Hud(window_width, window_height, self.cursor.x, self.cursor.y)
-        self.selected_nodes = []
         self.offset = Offset(0, 0)
+        self.selected_nodes = []
         self.last_mouse_press = None
         self.menu = None
+        self.cursor = Cursor(window_width // 2, window_height // 2, self.args)
+        self.hud = Hud(self.window, self.cursor, self.offset)
 
     def select_node(self, node: Node) -> None:
         if node in self.selected_nodes:
@@ -182,8 +181,8 @@ class View:
         self.hud.assess_window(
             self.window.getmaxyx()[1],
             self.window.getmaxyx()[0],
-            self.cursor.x,
-            self.cursor.y,
+            self.cursor,
+            self.offset,
         )
         self.hud.render(self.window)
 
@@ -484,7 +483,7 @@ class View:
                     self.offset.x -= x - self.cursor.x
                     self.offset.y -= y - self.cursor.y
 
-        if self.args.debug:
+        if "debug" in self.args and self.args.debug:
             logger.debug(f"Update cursor position to ({x}, {y})")
         self.cursor.x = x
         self.cursor.y = y
