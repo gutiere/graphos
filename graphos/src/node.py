@@ -80,6 +80,9 @@ class Node:
 
         return (self.x - offset.x + padding + 1, self.center_y - offset.y)
 
+    def __str__(self):
+        return f"Node( {self.id}, {self.x}, {self.y}, {self.width}, {self.height}, {self.value})"
+
     def render(self, stdscr: curses.window, offset):
 
         max_y, max_x = stdscr.getmaxyx()

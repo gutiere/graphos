@@ -26,7 +26,7 @@ class Cursor:
         self.y = y
         self.grab = False
         self.color = 1
-        self.symbol = "🐁"
+        self.symbol = ""
         self.grab_symbol = "👊"
 
     def assess_position(self, stdscr: window, offset: Offset) -> None:

@@ -6,6 +6,7 @@ from pathlib import Path
 from graphos.src.constants import LOG_OUTPUT, MOUSE_OUTPUT, SAVE_OUTPUT
 from graphos.src.cursor import Cursor
 from graphos.src.edge import Edge
+from graphos.src.hud import Hud
 from graphos.src.menu import Menu
 from graphos.src.modal import Modal
 from graphos.src.node import Node
@@ -43,10 +44,11 @@ class View:
         self.edges: list[Edge] = []
 
         self.cursor = Cursor(window_width // 2, window_height // 2)
-        self.menu = Menu(window_width, window_height, self.cursor.x, self.cursor.y)
+        self.hud = Hud(window_width, window_height, self.cursor.x, self.cursor.y)
         self.selected_nodes = []
         self.offset = Offset(0, 0)
         self.last_mouse_press = None
+        self.menu = None
 
     def select_node(self, node: Node) -> None:
         if node in self.selected_nodes:
@@ -172,13 +174,20 @@ class View:
             )
 
         # Draw border around the window
-        self.menu.assess_window(
+        self.hud.assess_window(
             self.window.getmaxyx()[1],
             self.window.getmaxyx()[0],
             self.cursor.x,
             self.cursor.y,
         )
-        self.menu.render(self.window)
+        self.hud.render(self.window)
+
+        # Draw menu
+        # self.menu.x = self.cursor.x
+        # self.menu.y = self.cursor.y
+        if self.menu is not None:
+            self.menu.assess_position(self.cursor.x, self.cursor.y)
+            self.menu.render()
 
         # Draw cursor
         self.cursor.assess_position(self.window, self.offset)
@@ -231,14 +240,17 @@ class View:
 
     def load_state(self):
         # Load the state from the file
+        loaded_nodes, loaded_edges = [], []
         try:
             with open(SAVE_OUTPUT, "r") as f:
                 state = json.load(f)
                 logger.debug(f"Loaded state: {state}")
+                loaded_nodes = []
                 for node in state["nodes"]:
-                    self.nodes.append(Node.from_JSON(node))
+                    loaded_nodes.append(Node.from_JSON(node))
+                loaded_edges = []
                 for edge in state["edges"]:
-                    self.edges.append(Edge.from_JSON(edge, self.nodes))
+                    loaded_edges.append(Edge.from_JSON(edge, loaded_nodes))
         except FileNotFoundError:
             logger.debug(f"State file {SAVE_OUTPUT} not found.")
         except json.JSONDecodeError:
@@ -247,6 +259,12 @@ class View:
             logger.debug(f"Error loading state: {e}")
             logger.debug(f"State file {SAVE_OUTPUT} may be corrupted.")
             return
+
+        if loaded_nodes:
+            self.nodes.clear()
+            self.edges.clear()
+            self.nodes.extend(loaded_nodes)
+            self.edges.extend(loaded_edges)
 
     def pan_left(self):
         self.offset.x -= 1
@@ -293,6 +311,19 @@ class View:
                 return True
         return False
 
+    def delete_selected(self):
+        for node in self.selected_nodes:
+            edges_to_keep = []
+            for edge in self.edges:
+                if edge.source.id == node.id or edge.target.id == node.id:
+                    logger.debug(f"Removing edge {edge} from {node}")
+                else:
+                    logger.debug(f"Keeping edge {edge} from {node}")
+                    edges_to_keep.append(edge)
+            self.edges = list(set(edges_to_keep))
+            self.nodes.remove(node)
+        self.selected_nodes.clear()
+
     def new_node(self):
         if self.is_node_at_cursor():
             curses.beep()
@@ -313,6 +344,47 @@ class View:
 
     def quit(self):
         exit(0)
+
+    def open_create_menu(self):
+        options = ["Create node", "Create edge"]
+        if len(self.selected_nodes) != 2:
+            options.remove("Create edge")
+
+        self.menu = Menu(
+            options,
+            self.menu.x,
+            self.menu.y,
+            self.window,
+        )
+
+    def open_menu(self, x: int, y: int):
+        options = [
+            "Create >",
+            "Delete selected",
+            "Save",
+            "Load",
+            "Quit",
+        ]
+
+        self.menu = Menu(
+            options,
+            x,
+            y,
+            self.window,
+        )
+
+    def get_clicked_menu_option(self, x: int, y: int) -> str:
+        # Get the objects that were clicked by the cursor
+
+        menu_index = self.menu.get_clicked_option(x, y)
+        if menu_index == -1:
+            self.menu = None
+            logger.debug("No option clicked")
+            return None
+
+        menu_option = self.menu.options[menu_index]
+        logger.debug(f"Clicked option: {menu_option}")
+        return menu_option
 
     def handle_mouse_event(self):
         event = curses.getmouse()
@@ -338,20 +410,48 @@ class View:
                 if node.focused:
                     node.grabbed = True
         elif event_type == 1:  # Mouse button released
-            last_mouse_press = self.get_last_mouse_press()
             self.cursor.grab = False
+            last_mouse_press = self.get_last_mouse_press()
+            is_click = last_mouse_press is not None and last_mouse_press == (x, y)
+            if is_click:
+                logger.debug(f"Clicked at ({x}, {y})")
+            else:
+                self.menu = None
+
+            click_fulfilled = False
             for node in self.nodes:
                 node.assess_position(self.cursor, self.offset)
                 if node.focused:
-                    logger.debug(f"x: {x}, y: {y}")
-                    logger.debug(
-                        f"cursor.x: {self.cursor.x}, cursor.y: {self.cursor.y}"
-                    )
-                    logger.debug(f"last_mouse_press: {last_mouse_press}")
-                    if last_mouse_press is not None and last_mouse_press == (x, y):
-                        logger.debug(f"Clicked on node: {node.value}")
+                    if is_click:
                         self.select_node(node)
+                        click_fulfilled = True
                     node.grabbed = False
+
+            # If no node was clicked, show modal for creation
+            if not click_fulfilled and is_click:
+                if self.menu:
+                    menu_option = self.get_clicked_menu_option(x, y)
+                    menu_option_mapping = {}
+                    menu_option_mapping["Create node"] = self.new_node
+                    menu_option_mapping["Create edge"] = self.new_edge
+                    menu_option_mapping["Delete selected"] = self.delete_selected
+                    menu_option_mapping["Save"] = self.save_state
+                    menu_option_mapping["Load"] = self.load_state
+                    menu_option_mapping["Quit"] = self.quit
+                    menu_option_mapping["Create >"] = self.open_create_menu
+
+                    if menu_option in menu_option_mapping:
+                        menu_option_mapping[menu_option]()
+                        if menu_option != "Create >":
+                            self.menu = None
+                        click_fulfilled = True
+
+            if not click_fulfilled and is_click:
+                if self.menu is None:
+                    self.open_menu(x, y)
+                else:
+                    self.menu = None
+
         if self.cursor.grab:
             node_grabbed = False
             for node in self.nodes:
