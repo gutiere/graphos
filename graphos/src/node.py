@@ -189,7 +189,7 @@ class Node:
                     display_string,
                 )
 
-    def to_JSON(self):
+    def to_json(self):
         return {
             "id": self.id,
             "x": self.x,
@@ -203,7 +203,7 @@ class Node:
         }
 
     @staticmethod
-    def from_JSON(data):
+    def from_json(data):
         if not isinstance(data, dict):
             raise ValueError("Invalid data format. Expected a dictionary.")
         new_node = Node(

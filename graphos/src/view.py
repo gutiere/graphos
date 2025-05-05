@@ -233,8 +233,8 @@ class View:
     def save_state(self):
         # Save the current state
         state = {
-            "nodes": [node.to_JSON() for node in self.nodes],
-            "edges": [edge.to_JSON() for edge in self.edges],
+            "nodes": [node.to_json() for node in self.nodes],
+            "edges": [edge.to_json() for edge in self.edges],
         }
         logger.debug(f"Saving state: {state}")
         logger.debug(f"Saving state to {SAVE_OUTPUT}")
@@ -251,10 +251,10 @@ class View:
                 logger.debug(f"Loaded state: {state}")
                 loaded_nodes = []
                 for node in state["nodes"]:
-                    loaded_nodes.append(Node.from_JSON(node))
+                    loaded_nodes.append(Node.from_json(node))
                 loaded_edges = []
                 for edge in state["edges"]:
-                    loaded_edges.append(Edge.from_JSON(edge, loaded_nodes))
+                    loaded_edges.append(Edge.from_json(edge, loaded_nodes))
         except FileNotFoundError:
             logger.debug(f"State file {SAVE_OUTPUT} not found.")
         except json.JSONDecodeError:
