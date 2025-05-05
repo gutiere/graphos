@@ -40,21 +40,23 @@ class Edge:
     Attributes:
         source: originating Node for connection
         target: destination Node
-        node_id: unique identifier for Edge, defaults to uuid
+        edge_id: unique identifier for Edge, defaults to uuid
     """
 
-    def __init__(self, source: Node, target: Node, node_id: str = None):
+    def __init__(self, source: Node, target: Node, edge_id: str = None) -> None:
         self.source = source
         self.target = target
 
-        self.id = node_id if node_id else str(uuid.uuid4())
+        self.id = edge_id if edge_id else str(uuid.uuid4())
 
     def __str__(self) -> str:
         """To string definition for Edge"""
         return f"Edge({self.source}, {self.target})"
 
     def _determine_relative_nodes(self) -> Tuple[Node, Node, Node, Node]:
-        """Determines the relative positions of nodes.
+        """
+        Determines the relative positions of nodes based on horizontal
+        and vertical locations.
 
         Returns:
             Tuple of Node objects left, right, top and bottom locations
@@ -451,7 +453,7 @@ class Edge:
         Returns:
             Edge: An Edge object created from the provided data.
         Raises:
-            ValueError: An error occurred during rendering the data
+            ValueError: An error occurred during rendering the data.
         """
         if not isinstance(data, dict):
             raise ValueError("Invalid data format. Expected a dictionary.")
@@ -480,6 +482,6 @@ class Edge:
         new_edge = Edge(
             source=source_node,
             target=target_node,
-            node_id=data["id"],
+            edge_id=data["id"],
         )
         return new_edge
